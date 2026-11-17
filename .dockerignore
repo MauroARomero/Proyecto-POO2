@@ -1,0 +1,13 @@
+.git
+__pycache__
+*.pyc
+results
+results_demo
+reports
+notebooks
+reporte
+docs
+jmeter
+k8s
+monitoring
+tests

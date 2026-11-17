@@ -1,0 +1,17 @@
+# Carga de datos (se ejecuta una sola vez). Si cambias la imagen: kubectl -n tienda delete job tienda-seed
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tienda-seed
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: seed
+          image: tienda-api   # reemplazada por kustomize (ver k8s/kustomization.yaml)
+          command: ["python", "-m", "app.seed"]
+          envFrom:
+            - configMapRef: { name: tienda-config }
+            - secretRef: { name: tienda-secret }

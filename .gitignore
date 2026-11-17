@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+.DS_Store
+# Resultados de JMeter: se versionan solo si quieres reproducir el notebook
+results/*.jtl
+results/*.log
+results_demo/
+reports/

@@ -1,0 +1,13 @@
+# Valores mínimos para el chart kube-prometheus-stack (Prometheus + Grafana + node-exporter).
+prometheus:
+  prometheusSpec:
+    # Permite que Prometheus descubra ServiceMonitors que no llevan la etiqueta del release.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    scrapeInterval: 5s
+grafana:
+  adminPassword: admin
+  service:
+    type: NodePort
+    nodePort: 30300
+alertmanager:
+  enabled: false

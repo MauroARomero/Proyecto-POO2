@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tienda-config
+data:
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_NAME: tienda
+  DB_USER: tienda
+  POOL_MAX_SIZE: "10"
+  WEB_CONCURRENCY: "1"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tienda-secret
+type: Opaque
+stringData:
+  # Cambia estas claves si el clúster es accesible desde Internet.
+  DB_PASSWORD: tienda
+  POSTGRES_PASSWORD: tienda

@@ -1,0 +1,72 @@
+# Fase 1 - Despliegue con Docker Compose en una sola máquina.
+# Uso:  docker compose up -d --build
+#       curl http://localhost:8000/reports/counts
+name: tienda
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tienda
+      POSTGRES_USER: tienda
+      POSTGRES_PASSWORD: tienda
+    command: ["postgres", "-c", "max_connections=200"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tienda -d tienda"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+    restart: unless-stopped
+
+  # Tarea de una sola ejecución: crea el esquema y carga >150.000 registros.
+  seed:
+    build: .
+    image: tienda-api:1.0.0
+    command: ["python", "-m", "app.seed"]
+    environment:
+      DB_HOST: db
+      DB_NAME: tienda
+      DB_USER: tienda
+      DB_PASSWORD: tienda
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build: .
+    image: tienda-api:1.0.0
+    environment:
+      DB_HOST: db
+      DB_NAME: tienda
+      DB_USER: tienda
+      DB_PASSWORD: tienda
+      POOL_MAX_SIZE: "10"
+      WEB_CONCURRENCY: "1"
+    ports:
+      - "8000:8000"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    # Mismos límites que el pod de Kubernetes, para que la comparación sea justa.
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:
